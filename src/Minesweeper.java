@@ -3,6 +3,10 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Random;
 import javax.swing.*;
+import java.io.File;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 
 public class Minesweeper {
     private class MineTile extends JButton {
@@ -14,7 +18,6 @@ public class Minesweeper {
             this.c = c;
         }
     }
-
 
     int tileSize = 70;
     int numRows = 8;
@@ -133,6 +136,22 @@ public class Minesweeper {
         for (int i = 0; i < mineList.size(); i++) {
             MineTile tile = mineList.get(i);
             tile.setText("💣");
+        }
+
+        try {
+            File file = new File("./audio/explosion.wav");
+            AudioInputStream stream = AudioSystem.getAudioInputStream(file);
+            Clip clip = AudioSystem.getClip();
+            clip.open(stream);
+            clip.start();
+
+            // sleep to allow enough time for the clip to play
+            Thread.sleep(500);
+
+            stream.close();
+
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
         }
 
         gameOver = true;
