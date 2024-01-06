@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Random;
 import javax.swing.*;
 import java.io.File;
@@ -9,7 +10,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 
 public class Minesweeper {
-    private class MineTile extends JButton {
+    private static class MineTile extends JButton {
         int r;
         int c;
 
@@ -38,6 +39,11 @@ public class Minesweeper {
     int tilesClicked = 0;
     boolean gameOver = false;
 
+    int gameTime = 0;
+    Timer timer;
+
+    int lastGameTime = 0;
+
     Minesweeper() {
         frame.setVisible(true);
         frame.setSize(boardWidth, boardHeight);
@@ -48,7 +54,7 @@ public class Minesweeper {
 
         textLabel.setFont(new Font("Arial", Font.BOLD, 25));
         textLabel.setHorizontalAlignment(JLabel.CENTER);
-        textLabel.setText("Minesweeper: " + Integer.toString(mineCount));
+        textLabel.setText("Minesweeper: " + mineCount + "     (Click to Start)");
         textLabel.setOpaque(true);
 
         textPanel.setLayout(new BorderLayout());
@@ -56,7 +62,6 @@ public class Minesweeper {
         frame.add(textPanel, BorderLayout.NORTH);
 
         boardPanel.setLayout(new GridLayout(numRows, numCols));
-        // boardPanel.setBackground(Color.green);
         frame.add(boardPanel);
         
         for (int r = 0; r < numRows; r++) {
@@ -67,7 +72,6 @@ public class Minesweeper {
                 tile.setFocusable(false);
                 tile.setMargin(new Insets(0, 0, 0, 0));
                 tile.setFont(new Font("Arial Unicode MS", Font.PLAIN, 45));
-                // tile.setText("💣");
                 tile.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mousePressed(MouseEvent e) {
@@ -78,7 +82,7 @@ public class Minesweeper {
 
                         //left click
                         if (e.getButton() == MouseEvent.BUTTON1) {
-                            if (tile.getText() == "") {
+                            if (Objects.equals(tile.getText(), "")) {
                                 if (mineList.contains(tile)) {
                                     revealMines();
                                 }
@@ -90,13 +94,13 @@ public class Minesweeper {
 
                         //right click
                         else if (e.getButton() == MouseEvent.BUTTON3) {
-                            if (tile.getText() == "" && tile.isEnabled()) {
+                            if (Objects.equals(tile.getText(), "") && tile.isEnabled()) {
                                 tile.setText("🚩");
                             }
-                            else if (tile.getText() == "🚩") {
+                            else if (Objects.equals(tile.getText(), "🚩")) {
                                 tile.setText("?");
                             }
-                            else if (tile.getText() == "?") {
+                            else if (Objects.equals(tile.getText(), "?")) {
                                 tile.setText("");
                             }
                         }
@@ -106,19 +110,18 @@ public class Minesweeper {
             }
         }
 
-        frame.setVisible(true);
+        timer = new Timer(1000, e -> {
+            gameTime++;
+            updateTimerLabel();
+        });
 
+        frame.setVisible(true);
         setMines();
     }
 
     void setMines() {
-        mineList = new ArrayList<MineTile>();
+        mineList = new ArrayList<>();
 
-        // mineList.add(board[2][2]);
-        // mineList.add(board[2][3]);
-        // mineList.add(board[5][6]);
-        // mineList.add(board[3][4]);
-        // mineList.add(board[1][1]);
         int mineLeft = mineCount;
         while (mineLeft > 0) {
             int r = random.nextInt(numRows); //0-7
@@ -133,8 +136,13 @@ public class Minesweeper {
     }
 
     void revealMines() {
-        for (int i = 0; i < mineList.size(); i++) {
-            MineTile tile = mineList.get(i);
+        timer.stop();
+
+        if (!gameOver) {
+            lastGameTime = gameTime;
+        }
+
+        for (MineTile tile : mineList) {
             tile.setText("💣");
         }
 
@@ -149,16 +157,21 @@ public class Minesweeper {
             Thread.sleep(500);
 
             stream.close();
-
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
 
         gameOver = true;
-        textLabel.setText("Game Over!");
+        textLabel.setText("Game Over!   Last Time: " + lastGameTime + "s");
     }
 
     void checkMine(int r, int c) {
+        updateTimerLabel();
+
+        if (!timer.isRunning()) {
+            timer.start();
+        }
+
         if (r < 0 || r >= numRows || c < 0 || c >= numCols) {
             return;
         }
@@ -205,12 +218,13 @@ public class Minesweeper {
             checkMine(r+1, c-1); //bottom left
             checkMine(r+1, c); //bottom
             checkMine(r+1, c+1); //bottom right
-
         }
 
         if (tilesClicked == numRows * numCols - mineList.size()) {
+            timer.stop();
+            lastGameTime = gameTime;
             gameOver = true;
-            textLabel.setText("Mines Cleared!");
+            textLabel.setText("Mines Cleared!   Last Time: " + lastGameTime + "s");
         }
     }
 
@@ -222,5 +236,9 @@ public class Minesweeper {
             return 1;
         }
         return 0;
+    }
+
+    void updateTimerLabel() {
+        textLabel.setText("Minesweeper: " + mineCount + "   Time: " + gameTime + "s");
     }
 }
