@@ -30,6 +30,7 @@ public class Minesweeper {
     JLabel textLabel = new JLabel();
     JPanel textPanel = new JPanel();
     JPanel boardPanel = new JPanel();
+    JButton resetButton = new JButton("Reset Game");
 
     int mineCount = 10;
     MineTile[][] board = new MineTile[numRows][numCols];
@@ -114,6 +115,10 @@ public class Minesweeper {
             gameTime++;
             updateTimerLabel();
         });
+
+        resetButton.addActionListener(e -> resetGame());
+
+        textPanel.add(resetButton, BorderLayout.EAST);
 
         frame.setVisible(true);
         setMines();
@@ -240,5 +245,27 @@ public class Minesweeper {
 
     void updateTimerLabel() {
         textLabel.setText("Minesweeper: " + mineCount + "   Time: " + gameTime + "s");
+    }
+
+    void resetGame() {
+        tilesClicked = 0;
+        gameOver = false;
+        gameTime = 0;
+        timer.stop();
+
+        // Mengatur ulang label dan tombol di setiap tile
+        for (int r = 0; r < numRows; r++) {
+            for (int c = 0; c < numCols; c++) {
+                MineTile tile = board[r][c];
+                tile.setEnabled(true);
+                tile.setText("");
+            }
+        }
+
+        textLabel.setText("Minesweeper: " + mineCount + "     (Click to Start)");
+
+        // Mengatur ulang mines dan memulai ulang timer
+        setMines();
+//        timer.restart();
     }
 }
