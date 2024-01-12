@@ -32,9 +32,9 @@ Feel free to modify the code and experiment with different tile sizes, fonts, or
 
 ## Acknowledgments
 - The project utilizes the Swing library for creating the graphical user interface.
-- Sound effects obtained from mixkit.co.
+- Sound effects obtained from [mixkit.co](https://mixkit.co).
 
 ## Credits
-This program was obtained from ImKennyYip and developed by myself
+This program was obtained from Kenny Yip Coding ([ImKennyYip](https://github.com/ImKennyYip)) and developed by myself.
 
 Enjoy playing JavaMineSweeper! If you have any feedback or suggestions, feel free to contribute or open an issue.
